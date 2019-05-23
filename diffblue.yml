@@ -1,0 +1,494 @@
+buildCmd: sh ./gradlew assemble
+testCmd: true
+lineLength: 4096
+skipVerification: true
+cbmcArguments:
+  # Do not generate coverage comments on generated tests.
+  java-generate-no-comments: true
+phases:
+  -
+  #Phase 0 PRETTY AND SIMPLE - Simple models, quick cover, pretty Tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # Instrument the file as opposed to the function only
+      cover-only: file
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 1 PRETTY AND COMPLEX - Standard models, longer run time, pretty tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 2
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+  #Phase 2 Simple and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # If the logs contain output of the following then proceed to phase X
+    nextPhase:
+      # If the function is not analysable then do not pass onto the next phase
+      not_analyzed: null
+  -
+  #Phase 3 Complex and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 3000
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 4 EXCEPTIONS
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+  -
+    #PHASE 5 Big numbers and less contraints on inputs 
+    timeout: 300
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 100
+      # Bound the length of input strings.
+      max-nondet-string-length: 100
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 6
+units:
+# Target TGF: 256.819642857
+#  >methods=39
+#  >complexity=811
+#  >construction=14.8214285714
+#  >dependency=13.8428571429
+ - target:
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/client/languageserver/wrapper/LanguageServerWrapper.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/client/languageserver/wrapper/LanguageServerWrapper.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/utils/ApplicationUtils.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/utils/ApplicationUtils.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/editor/listeners/EditorMouseListenerImpl.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/editor/listeners/EditorMouseListenerImpl.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/client/languageserver/ServerOptions.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/client/languageserver/ServerOptions.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/client/languageserver/LSPServerStatusWidget.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/client/languageserver/LSPServerStatusWidget.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/client/languageserver/requestmanager/DefaultRequestManager.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/client/languageserver/requestmanager/DefaultRequestManager.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/client/languageserver/requestmanager/RequestManager.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/client/languageserver/requestmanager/RequestManager.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/client/languageserver/serverdefinition/LanguageServerDefinition.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/client/languageserver/serverdefinition/LanguageServerDefinition.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/editor/listeners/DocumentListenerImpl.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/editor/listeners/DocumentListenerImpl.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/editor/listeners/EditorMouseMotionListenerImpl.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/editor/listeners/EditorMouseMotionListenerImpl.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/client/ServerWrapperBaseClientContext.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/client/ServerWrapperBaseClientContext.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/IntellijLanguageClient.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/IntellijLanguageClient.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/client/languageserver/wrapper/MessageHandler.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/client/languageserver/wrapper/MessageHandler.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/extensions/LSPExtensionManager.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/extensions/LSPExtensionManager.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/requests/Timeout.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/requests/Timeout.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/client/DefaultLanguageClient.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/client/DefaultLanguageClient.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/utils/FileUtils.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/utils/FileUtils.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/editor/EditorEventManager.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/editor/EditorEventManager.java
+# Target TGF: 133.714285714
+#  >methods=6
+#  >complexity=26
+#  >construction=11.5714285714
+#  >dependency=2.0
+ - target:
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/contributors/icon/LSPDefaultIconProvider.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/contributors/icon/LSPDefaultIconProvider.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/contributors/icon/LSPIconProvider.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/contributors/icon/LSPIconProvider.java
+# Target TGF: 876.032142857
+#  >methods=27
+#  >complexity=445
+#  >construction=46.5428571429
+#  >dependency=7.03333333333
+ - target:
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/utils/FileUtils.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/utils/FileUtils.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/utils/ApplicationUtils.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/utils/ApplicationUtils.java
+# Target TGF: 143.875
+#  >methods=12
+#  >complexity=225
+#  >construction=4.5
+#  >dependency=5.5
+ - target:
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/client/languageserver/serverdefinition/ArtifactLanguageServerDefinition.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/client/languageserver/serverdefinition/ArtifactLanguageServerDefinition.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/client/connection/ProcessStreamConnectionProvider.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/client/connection/ProcessStreamConnectionProvider.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/utils/Utils.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/utils/Utils.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/client/languageserver/serverdefinition/UserConfigurableServerDefinition.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/client/languageserver/serverdefinition/UserConfigurableServerDefinition.java
+# Target TGF: 214.875
+#  >methods=15
+#  >complexity=109
+#  >construction=9.0
+#  >dependency=3.5
+ - target:
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/requests/FileEventManager.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/requests/FileEventManager.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/utils/ApplicationUtils.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/utils/ApplicationUtils.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/IntellijLanguageClient.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/IntellijLanguageClient.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/editor/EditorEventManager.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/editor/EditorEventManager.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/editor/EditorEventManagerBase.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/editor/EditorEventManagerBase.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/client/languageserver/requestmanager/RequestManager.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/client/languageserver/requestmanager/RequestManager.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/client/languageserver/wrapper/LanguageServerWrapper.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/client/languageserver/wrapper/LanguageServerWrapper.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/utils/FileUtils.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/utils/FileUtils.java
+# Target TGF: 548.374404762
+#  >methods=38
+#  >complexity=370
+#  >construction=45.0357142857
+#  >dependency=6.59444444444
+ - target:
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/IntellijLanguageClient.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/IntellijLanguageClient.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/editor/listeners/EditorListener.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/editor/listeners/EditorListener.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/editor/listeners/FileDocumentManagerListenerImpl.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/editor/listeners/FileDocumentManagerListenerImpl.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/utils/ApplicationUtils.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/utils/ApplicationUtils.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/requests/Timeout.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/requests/Timeout.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/editor/listeners/VFSListener.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/editor/listeners/VFSListener.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/client/languageserver/requestmanager/RequestManager.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/client/languageserver/requestmanager/RequestManager.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/utils/FileUtils.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/utils/FileUtils.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/client/languageserver/wrapper/LanguageServerWrapper.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/client/languageserver/wrapper/LanguageServerWrapper.java
+# Target TGF: 169.887121212
+#  >methods=85
+#  >complexity=1049
+#  >construction=12.25
+#  >dependency=9.79090909091
+ - target:
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/editor/EditorEventManager.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/editor/EditorEventManager.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/utils/DocumentUtils.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/utils/DocumentUtils.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/utils/ApplicationUtils.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/utils/ApplicationUtils.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/requests/HoverHandler.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/requests/HoverHandler.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/client/languageserver/requestmanager/RequestManager.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/client/languageserver/requestmanager/RequestManager.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/requests/WorkspaceEditHandler.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/requests/WorkspaceEditHandler.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/client/languageserver/wrapper/LanguageServerWrapper.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/client/languageserver/wrapper/LanguageServerWrapper.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/contributors/icon/LSPIconProvider.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/contributors/icon/LSPIconProvider.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/requests/Timeout.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/requests/Timeout.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/actions/LSPReferencesAction.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/actions/LSPReferencesAction.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/utils/GUIUtils.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/utils/GUIUtils.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/editor/EditorEventManagerBase.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/editor/EditorEventManagerBase.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/contributors/inspection/LSPInspection.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/contributors/inspection/LSPInspection.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/utils/FileUtils.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/utils/FileUtils.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/editor/EditorEventManager$1.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/editor/EditorEventManager.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/contributors/rename/LSPRenameProcessor.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/contributors/rename/LSPRenameProcessor.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/editor/CtrlRangeMarker.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/editor/CtrlRangeMarker.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/contributors/psi/LSPPsiElement.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/contributors/psi/LSPPsiElement.java
+# Target TGF: 1162.0
+#  >methods=5
+#  >complexity=186
+#  >construction=12.0
+#  >dependency=4.0
+ - target:
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/utils/Utils.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/utils/Utils.java
+# Target TGF: 132.5
+#  >methods=9
+#  >complexity=178
+#  >construction=6.0
+#  >dependency=5.5
+ - target:
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/client/connection/ProcessStreamConnectionProvider.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/client/connection/ProcessStreamConnectionProvider.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/client/connection/StreamConnectionProvider.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/client/connection/StreamConnectionProvider.java
+# Target TGF: 130.875
+#  >methods=14
+#  >complexity=85
+#  >construction=11.25
+#  >dependency=3.5
+ - target:
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/client/languageserver/serverdefinition/UserConfigurableServerDefinition.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/client/languageserver/serverdefinition/UserConfigurableServerDefinition.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/client/languageserver/serverdefinition/ArtifactLanguageServerDefinition.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/client/languageserver/serverdefinition/ArtifactLanguageServerDefinition.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/client/languageserver/serverdefinition/UserConfigurableServerDefinitionObject.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/client/languageserver/serverdefinition/UserConfigurableServerDefinitionObject.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/client/languageserver/serverdefinition/CommandServerDefinition.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/client/languageserver/serverdefinition/CommandServerDefinition.java
+   - dir: build/classes/java/main-instrumented
+     file: org/wso2/lsp4intellij/client/languageserver/serverdefinition/LanguageServerDefinition.class
+     sourceDir: src/main/java
+     sourceFile: org/wso2/lsp4intellij/client/languageserver/serverdefinition/LanguageServerDefinition.java
